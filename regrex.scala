@@ -1,3 +1,4 @@
+import org.xml.sax.Parser
 // abstract class doesn't need implementation.
 abstract class RegrexExpr
 
@@ -16,6 +17,13 @@ case class Concat(expr1: RegrexExpr, expr2: RegrexExpr) extends RegrexExpr
 case class Repeat(expr: RegrexExpr) extends RegrexExpr
 
 // a+
-case class Plug(expr: RegrexExpr) extends RegrexExpr
+case class Plus(expr: RegrexExpr) extends RegrexExpr
 
-
+// 4 different levels of binding strength,
+// we need 4 different types of expressions.
+// We named them lit, lowExpr(+, *), midExpr(concatenation) and highExpr(|)
+object RegrexParser extends RegrexParser {
+  def charLit: Parser[RegrexExpr] = ("""\w""".r| ".") ^^ {
+    char => Literal(char.head)
+  }
+}
