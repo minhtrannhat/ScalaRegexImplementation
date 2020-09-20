@@ -1,6 +1,10 @@
 # ScalaRegexImplementation
 A regex engine written in Scala. A tutorial by https://github.com/rcoh/toyregex .
 
+## Compilation and Running
+
+run the command `sbt run` at project's root directory.
+
 ## The regular expression language
 * `.`: Match any character
 * `|`: Match `abc` OR `cde`
