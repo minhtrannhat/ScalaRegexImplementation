@@ -1,30 +1,32 @@
-import org.xml.sax.Parser
+import scala.util.parsing.combinator._
+import collection.mutable
+
 // abstract class doesn't need implementation.
-abstract class RegrexExpr
+abstract class RegexExpr
 
 // case classes are used because the data they process are immutable.
 // and they are useful for pattern matching.
 
 // ., a, b : string literal
-case class Literal(c: Char) extends RegrexExpr
+case class Literal(c: Char) extends RegexExpr
 
 // a | b : Or
-case class Or(expr1: RegrexExpr, expr2: RegrexExpr) extends RegrexExpr
+case class Or(expr1: RegexExpr, expr2: RegexExpr) extends RegexExpr
 
 // ab -> Concat(a, b); abc -> Concat(a, Concat(b, c))
-case class Concat(expr1: RegrexExpr, expr2: RegrexExpr) extends RegrexExpr
+case class Concat(expr1: RegexExpr, expr2: RegexExpr) extends RegexExpr
 
 // a*: repeat
-case class Repeat(expr: RegrexExpr) extends RegrexExpr
+case class Repeat(expr: RegexExpr) extends RegexExpr
 
 // a+
-case class Plus(expr: RegrexExpr) extends RegrexExpr
+case class Plus(expr: RegexExpr) extends RegexExpr
 
 // 4 different levels of binding strength,
 // we need 4 different types of expressions.
 // We named them lit, lowExpr(+, *), midExpr(concatenation) and highExpr(|)
-object RegrexParser extends RegrexParser {
-  def charLit: Parser[RegrexExpr] = ("""\w""".r| ".") ^^ {
+object RegexParser extends RegexParsers {
+  def charLit: Parser[RegexExpr] = ("""\w""".r| ".") ^^ {
     char => Literal(char.head)
   }
 }
