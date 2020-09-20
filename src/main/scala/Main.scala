@@ -3,6 +3,7 @@ import org.xml.sax.Parser
 abstract class RegrexExpr
 
 // case classes are used because the data they process are immutable.
+// and they are useful for pattern matching.
 
 // ., a, b : string literal
 case class Literal(c: Char) extends RegrexExpr
