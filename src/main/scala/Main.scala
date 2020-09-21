@@ -22,6 +22,12 @@ case class Repeat(expr: RegexExpr) extends RegexExpr
 // a+
 case class Plus(expr: RegexExpr) extends RegexExpr
 
+// In regular expressions, the order of binding strength is:
+// 1. Character literals and parentheses
+// 2. + and *
+// 3. Concatenation
+// 4. | : OR
+
 // 4 different levels of binding strength,
 // we need 4 different types of expressions.
 // We named them lit, lowExpr(+, *), midExpr(concatenation) and highExpr(|)
