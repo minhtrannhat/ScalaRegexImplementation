@@ -16,10 +16,10 @@ case class Or(expr1: RegexExpr, expr2: RegexExpr) extends RegexExpr
 // ab -> Concat(a, b); abc -> Concat(a, Concat(b, c))
 case class Concat(expr1: RegexExpr, expr2: RegexExpr) extends RegexExpr
 
-// a*: repeat
+// a*: match 0 or more of the previous pattern
 case class Repeat(expr: RegexExpr) extends RegexExpr
 
-// a+
+// a+: match one or more of the previous pattern
 case class Plus(expr: RegexExpr) extends RegexExpr
 
 // In regular expressions, the order of binding strength is:
