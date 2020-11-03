@@ -44,11 +44,11 @@ object RegexParser extends RegexParsers {
   def lit: Parser[RegexExpr] = charLit | parenExpr
 
   def repeat: Parser[RegexExpr] = lit <~ "*" ^^ {
-    case l => Repeat(l) 
+    case l => Repeat(l)
   }
 
   def plus: Parser[RegexExpr] = lit <~ "+" ^^ {
-    case p => Plus(p) 
+    case p => Plus(p)
   }
 
   def lowExpr: Parser[RegexExpr] = repeat | plus | lit
@@ -60,13 +60,15 @@ object RegexParser extends RegexParsers {
   def midExpr: Parser[RegexExpr] = concat | lowExpr
 
   def or: Parser[RegexExpr] = midExpr ~ "|" ~ midExpr ^^ {
-    case l ~ "|" ~ r => Or(l, r) 
+    case l ~ "|" ~ r => Or(l, r)
   }
 
   def highExpr: Parser[RegexExpr] = or | midExpr
 
+  // listToConcat() take a list of RegexExpr as its parameter
+  // and return a list
   def listToConcat(list: List[RegexExpr]): RegexExpr = list match {
-    case head :: Nil => head
+    case head:: Nil => head
     case head:: rest => Concat(head, listToConcat(rest))
   }
 
