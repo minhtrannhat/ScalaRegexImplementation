@@ -88,7 +88,7 @@ class Split(val out1: State, val out2:State) extends State
 // case class were used because they make all Match objects equal
 case class Match() extends State
 
-class Placeholder(var pointingtTo: State) extends State
+class Placeholder(var pointingTo: State) extends State
 
 object NFA {
   def regexToNFA(regex: RegexExpr): State =
@@ -105,7 +105,7 @@ object NFA {
         }
 
         case Or(l, r) => new Split(
-          regexToNFA(l, andThen)
+          regexToNFA(l, andThen),
           regexToNFA(r, andThen)
         )
 
@@ -117,11 +117,87 @@ object NFA {
             regexToNFA(r, placeholder),
             andThen
           )
-          placeholder.pointingtTo = split
+          placeholder.pointingTo = split
           placeholder
         
         case Plus(r) => 
           regexToNFA(Concat(r, Repeat(r)), andThen)
       }
+  }
+}
+
+object NFAEvaluator {
+    def evaluate(nfa: State, input: String): Boolean = 
+        evaluate(Set(nfa), input)
+
+    def evaluate(nfas: Set[State], input: String): Boolean = {
+        input match {
+            case "" => 
+                evaluateStates(nfas, None).exists(_ == Match())
+            case string => 
+                evaluate(
+                    evaluateStates(nfas, input.headOption), 
+                    string.tail
+                )
+        }
+    }
+
+    def evaluateStates(nfas: Set[State], 
+                       input: Option[Char]): Set[State] = {
+        val visitedStates = mutable.Set[State]()
+        nfas.flatMap { state => 
+            evaluateState(state, input, visitedStates)
+        }
+    }
+
+    def evaluateState(currentState: State, input: Option[Char],
+        visitedStates: mutable.Set[State]): Set[State] = {
+
+        if (visitedStates contains currentState) {
+            Set()
+        } else {
+            visitedStates.add(currentState)
+            currentState match {
+                case placeholder: Placeholder => 
+                    evaluateState(
+                        placeholder.pointingTo, 
+                        input,
+                        visitedStates
+                    )
+                case consume: Consume => 
+                    if (Some(consume.c) == input 
+                        || consume.c == '.') { 
+                        Set(consume.out) 
+                    } else { 
+                        Set()
+                    }
+                case s: Split => 
+                    evaluateState(s.out1, input, visitedStates) ++ 
+                    evaluateState(s.out2, input, visitedStates)
+                case m: Match => 
+                    if (input.isDefined) Set() else Set(Match())
+            }
+        }
+    }
+}
+
+object Regex {
+    def fullMatch(input: String, pattern: String) = {
+        val parsed = RegexParser(pattern).getOrElse(
+            throw new RuntimeException("Failed to parse regex")
+        )
+        val nfa = NFA.regexToNFA(parsed)
+        NFAEvaluator.evaluate(nfa, input)
+    }   
+
+    def matchAnywhere(input: String, pattern: String) = 
+        fullMatch(input, ".*" + pattern + ".*")
+}
+
+object RegexScala {
+  def main(args: Array[String]):Unit = {
+    Regex.fullMatch("aaaaab", "a*b")
+    Regex.fullMatch("aaaaabc", "a*b")
+    Regex.matchAnywhere("abcde", "cde")
   }
 }
